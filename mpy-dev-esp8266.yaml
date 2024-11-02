@@ -1,0 +1,37 @@
+packages:
+  - esptool
+
+write_files:
+  - path: /home/dev/.zprofile
+    content: |
+      if [ -f "/etc/profile" ]; then
+        source "/etc/profile"
+      fi
+      path=(
+        "${XDG_DATA_HOME:-$HOME}/.local/bin"
+        "/opt/xtensa-lx106-elf/bin"
+        $path
+      )
+  - path: /run/setup-global-toolchain.sh
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      wget https://micropython.org/resources/xtensa-lx106-elf-standalone.tar.gz -O /run/xtensa-lx106-elf-standalone.tar.gz
+      tar xzf /run/xtensa-lx106-elf-standalone.tar.gz -C /opt
+      rm -f /opt/xtensa-lx106-elf/bin/esptool.py
+  - path: /run/setup-local-toolchain.sh
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      ROOT="${XDG_DATA_HOME:-$HOME}/.local/bin"
+      mkdir -p $ROOT
+      for cmd in c++ cc g++ gcc gcc-4.8.5;
+      do
+        ln -s `which ccache` $ROOT/xtensa-lx106-elf-$cmd;
+      done
+
+runcmd:
+  - [ sh, -c, "sh /run/setup-global-toolchain.sh" ]
+  - [ sudo, -H, -u, dev, sh, -c, "sh /run/setup-local-toolchain.sh" ]

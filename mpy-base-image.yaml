@@ -1,0 +1,157 @@
+package_update: true
+package_upgrade: true
+
+timezone: Europe/Rome
+
+packages:
+  - aptitude
+  - autoconf
+  - automake
+  - avahi-daemon
+  - bat
+  - bear
+  - build-essential
+  - byobu
+  - ccache
+  - cmake
+  - fd-find
+  - gdb-multiarch
+  - git
+  - libffi-dev
+  - libtool
+  - make
+  - mc
+  - neovim
+  - openssh-server
+  - pkg-config
+  - psmisc
+  - python3
+  - python3-pip
+  - python3-pyelftools
+  - qemu-user
+  - ripgrep
+  - rr
+  - ssh-import-id
+  - tig
+  - tmux
+  - zsh
+
+user:
+  name: dev
+  group: dev
+  # Incus's Ubuntu 22.04LTS Cloud image doesn't have ssh-import-id
+  # preinstalled, and `ssh_import_id` is skipped for that reason.
+  lock_passwd: true
+  sudo: [ "ALL=(ALL) NOPASSWD:ALL" ]
+  shell: /usr/bin/zsh
+
+write_files:
+  - path: /home/dev/.config/nvim/init.lua
+    content: |
+      vim.g.mapleader = " "
+      vim.g.maplocalleader = "\\"
+      vim.opt.compatible = false
+      vim.opt.encoding = "utf-8"
+      vim.opt.updatetime = 300
+      vim.opt.signcolumn = "yes"
+      vim.opt.number = true
+      vim.cmd [[colorscheme torte]]
+  - path: /home/dev/.config/gdb/gdbinit
+    content: |
+      set auto-load safe-path /
+      set pagination off
+  - path: /etc/ssh/sshd_config.d/99-micropython.conf
+    permissions: "0644"
+    content: |
+      PermitRootLogin no
+      AllowUsers dev
+  - path: /etc/systemd/resolved.conf
+    permissions: "0644"
+    content: |
+      [Resolve]
+      MulticastDNS=yes
+      LLMNR=no
+  - path: /etc/avahi/avahi-daemon.conf
+    permissions: "0664"
+    content: |
+      [server]
+      use-ipv4=yes
+      use-ipv6=yes
+      allow-interfaces=eth0
+      ratelimit-interval-usec=1000000
+      ratelimit-burst=1000
+      [wide-area]
+      enable-wide-area=yes
+      [publish]
+      publish-hinfo=no
+      publish-workstation=no
+  - path: /home/dev/.zshrc
+    content: |
+      autoload -Uz compinit
+      compinit
+      zstyle ':completion:*' menu select
+      HISTFILE="${XDG_DATA_HOME:-$HOME}/.local/share/zsh/history"
+      HISTSIZE=10000000
+      SAVEHIST=10000000
+      alias bat='batcat'
+      alias fd='fdfind'
+      alias ll='ls -la'
+      alias ls='ls --color'
+      setopt APPENDHISTORY
+      setopt EXTENDED_HISTORY
+      setopt HIST_EXPIRE_DUPS_FIRST
+      setopt HIST_IGNORE_DUPS
+      setopt HIST_IGNORE_SPACE
+      setopt HIST_REDUCE_BLANKS
+      setopt EXTENDED_GLOB
+      setopt GLOB_DOTS
+      setopt NOMATCH
+      setopt NOTIFY
+      unsetopt BEEP
+      export PS1="[%~] $ "
+      source "${XDG_DATA_HOME:-$HOME}/.byobu/rewrite_status.sh"
+  - path: /home/dev/.byobu/rewrite_status.sh
+    content: |
+      # The version of byobu shipped with Ubuntu 22.04 and 24.04 overwrites
+      # $HOME/.byobu/status when running `byobu-enable`, so that is
+      # written elsewhere and then moved in place after `byobu-enable`
+      # finishes.
+      echo 'tmux_left="hostname session"' > ${XDG_DATA_HOME:-$HOME}/.byobu/status
+      echo 'tmux_right="load_average memory disk date time"' >> ${XDG_DATA_HOME:-$HOME}/.byobu/status
+  - path: /home/dev/.byobu/keybindings.tmux
+    content: |
+      source $BYOBU_PREFIX/share/byobu/keybindings/f-keys.tmux.disable
+      unbind C-b
+      set -g prefix C-Space
+      bind C-Space send-prefix
+      bind Space last-window
+      bind-key "|" split-window -h -c "#{pane_current_path}"
+      bind-key "\\" split-window -fh -c "#{pane_current_path}"
+      bind-key "-" split-window -v -c "#{pane_current_path}"
+      bind-key "_" split-window -fv -c "#{pane_current_path}"
+      bind -n C-S-k clear-history
+      unbind-key -n C-a
+  - path: /home/dev/.byobu/profile.tmux
+    content: |
+      source $BYOBU_PREFIX/share/byobu/profiles/tmux
+      set -g base-index 1
+      setw -g pane-base-index 1
+      set -g renumber-windows on
+      set -g default-terminal "tmux-256color"
+      set -g set-titles on
+      set -g set-titles-string "#T"
+  - path: /home/dev/.byobu/.tmux.conf
+    content: |
+      set -g mouse on
+ntp:
+  enabled: true
+  pools: [ 0.it.pool.ntp.org, 1.it.pool.ntp.org, 2.it.pool.ntp.org, 3.it.pool.ntp.org ]
+
+runcmd:
+  - [ systemctl, stop, unattended-upgrades ]
+  - [ apt, purge, -y, unattended-upgrades ]
+  - [ pip3, install, ar, --break-system-packages ]
+  - [ mkdir, -p, "/home/dev/.local/share/zsh" ]
+  - [ chown, -R, "dev:dev", "/home/dev" ]
+  - [ sudo, -H, -u, dev, sh, -c, "ssh-import-id gh:agatti" ]
+  - [ sudo, -H, -u, dev, -i, "byobu-enable" ]

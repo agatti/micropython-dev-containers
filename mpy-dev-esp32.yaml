@@ -1,0 +1,24 @@
+packages:
+  - bison
+  - dfu-util
+  - flex
+  - gperf
+  - libssl-dev
+  - libusb-1.0-0
+  - ninja-build
+  - python3-venv
+  - wget
+
+write_files:
+  - path: /home/dev/.zprofile
+    content: |
+      if [ -f "/etc/profile" ]; then
+        source "/etc/profile"
+      fi
+      if [ -f "${XDG_DATA_HOME:-$HOME}/.local/esp-idf/export.sh" ]; then
+         source "${XDG_DATA_HOME:-$HOME}/.local/esp-idf/export.sh"
+      fi
+
+runcmd:
+  - [ sudo, -H, -u, dev, sh, -c, "git clone -b v5.4 --recursive --depth 1 https://github.com/espressif/esp-idf.git ${XDG_DATA_HOME:-$HOME}/.local/esp-idf" ]
+  - [ sudo, -H, -u, dev, sh, -c, "cd ${XDG_DATA_HOME:-$HOME}/.local/esp-idf && ./install.sh esp32,esp32c3,esp32c6,esp32s2,esp32s3" ]

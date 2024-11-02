@@ -1,0 +1,18 @@
+packages:
+  - libncurses-dev
+  - rsync
+
+write_files:
+  - path: /run/setup-openwrt.sh
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      TARGET=${XDG_DATA_HOME:-$HOME}/openwrt
+      git clone https://git.openwrt.org/openwrt/openwrt.git --branch openwrt-24.10 --depth 1 $TARGET
+      cd $TARGET
+      ./scripts/feeds update -a
+      ./scripts/feeds install -a
+
+runcmd:
+  - [ sudo, -H, -u, dev, sh, -c, "sh /run/setup-openwrt.sh" ]
