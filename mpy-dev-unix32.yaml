@@ -1,0 +1,8 @@
+# base-image: ubuntu/jammy/cloud
+packages:
+  - rr
+
+runcmd:
+  - [ dpkg, --add-architecture, i386 ]
+  - [ apt, update ]
+  - [ apt, install, -y, gcc-multilib, g++-multilib, libffi-dev:i386, python2.7 ]
