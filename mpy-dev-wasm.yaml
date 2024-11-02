@@ -1,0 +1,19 @@
+packages:
+  - npm
+
+write_files:
+  - path: /home/dev/.zprofile
+    content: |
+      if [ -f "/etc/profile" ]; then
+        source "/etc/profile"
+      fi
+      path=(
+        "/opt/emsdk"
+        "/opt/emsdk/upstream/emscripten"
+        $path
+      )
+
+runcmd:
+  - [ sh, -c, "cd /run && npm install terser" ]
+  - [ sh, -c, "git clone https://github.com/emscripten-core/emsdk.git /opt/emsdk" ]
+  - [ sh, -c, "cd /opt/emsdk && ./emsdk install latest && ./emsdk activate latest" ]

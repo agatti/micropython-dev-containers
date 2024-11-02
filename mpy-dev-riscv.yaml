@@ -1,0 +1,20 @@
+packages:
+  - gcc-riscv64-unknown-elf
+  - picolibc-riscv64-unknown-elf
+  - qemu-system
+
+write_files:
+  - path: /run/setup-local-toolchain.sh
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      ROOT="${XDG_DATA_HOME:-$HOME}/.local/bin"
+      mkdir -p $ROOT
+      for cmd in c++ cc g++ gcc gcc-13.2.0;
+      do
+        ln -s `which ccache` $ROOT/riscv64-unknown-elf-$cmd
+      done
+
+runcmd:
+  - [ sudo, -H, -u, dev, sh, -c, "sh /run/setup-local-toolchain.sh"]
