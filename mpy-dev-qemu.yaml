@@ -1,0 +1,27 @@
+packages:
+  - gcc-arm-none-eabi
+  - gcc-riscv64-unknown-elf
+  - gcc-xtensa-lx106
+  - libnewlib-arm-none-eabi
+  - picolibc-riscv64-unknown-elf
+  - picolibc-xtensa-lx106-elf
+
+write_files:
+  - path: /home/dev/.zprofile
+    content: |
+      if [ -f "/etc/profile" ]; then
+        source "/etc/profile"
+      fi
+      path=(
+        "${XDG_DATA_HOME:-$HOME}/.local/bin"
+        /opt/qemu/bin
+        $path
+      )
+
+runcmd:
+  - [ sh, -c, "DEBIAN_FRONTEND=noninteractive apt -yq install ninja-build python3-tomli libglib2.0-dev" ]
+  - [ sh, -c, "git clone --branch v9.2.0 --depth 1 https://github.com/qemu/qemu.git /run/qemu" ]
+  - [ sh, -c, "cd /run/qemu && ./configure --without-default-features --target-list=arm-softmmu,riscv32-softmmu,xtensa-softmmu --enable-malloc-trim --enable-strip --prefix=/opt/qemu" ]
+  - [ sh, -c, "cd /run/qemu/build && ninja" ]
+  - [ sh, -c, "cd /run/qemu/build && ninja install" ]
+  - [ sh, -c, "DEBIAN_FRONTEND=noninteractive apt -yq autoremove ninja-build python3-tomli libglib2.0-dev" ]

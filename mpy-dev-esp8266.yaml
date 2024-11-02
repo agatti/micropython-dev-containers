@@ -1,0 +1,21 @@
+packages:
+  - esptool
+
+write_files:
+  - path: /home/dev/.zprofile
+    content: |
+      if [ -f "/etc/profile" ]; then
+        source "/etc/profile"
+      fi
+      path=(
+        "${XDG_DATA_HOME:-$HOME}/.local/bin"
+        "/opt/xtensa-lx106-elf/bin"
+        $path
+      )
+
+runcmd:
+  - [ sh, -c, "wget https://micropython.org/resources/xtensa-lx106-elf-standalone.tar.gz -O /run/xtensa-lx106-elf-standalone.tar.gz" ]
+  - [ sh, -c, "tar xzf /run/xtensa-lx106-elf-standalone.tar.gz -C /opt" ]
+  - [ sh, -c, "rm -f /opt/xtensa-lx106-elf/bin/esptool.py" ]
+  - [ sudo, -H, -u, dev, sh, -c, "mkdir -p ${XDG_DATA_HOME:-$HOME}/.local/bin" ]
+  - [ sudo, -H, -u, dev, sh, -c, "for cmd in c++ cc g++ gcc gcc-4.8.5; do ln -s `which ccache` ${XDG_DATA_HOME:-$HOME}/.local/bin/xtensa-lx106-elf-$cmd; done" ]
