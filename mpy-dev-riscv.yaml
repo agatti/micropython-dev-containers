@@ -1,0 +1,4 @@
+packages:
+  - gcc-riscv64-unknown-elf
+  - picolibc-riscv64-unknown-elf
+  - qemu-system

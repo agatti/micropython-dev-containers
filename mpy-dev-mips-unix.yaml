@@ -1,0 +1,8 @@
+packages:
+  - gcc-mips-linux-gnu
+  - g++-mips-linux-gnu
+  - libc6-mips-cross
+
+runcmd:
+  - [ mkdir, /etc/qemu-binfmt ]
+  - [ ln, -s, /usr/mips-linux-gnu/, /etc/qemu-binfmt/mips ]

@@ -1,0 +1,13 @@
+packages:
+  - gcc-arm-none-eabi
+  - gcc-riscv64-unknown-elf
+  - libnewlib-arm-none-eabi
+  - picolibc-riscv64-unknown-elf
+
+runcmd:
+  - [ sh, -c, "DEBIAN_FRONTEND=noninteractive apt -yq install ninja-build python3-tomli libglib2.0-dev" ]
+  - [ sh, -c, "git clone --branch v9.2.0 --depth 1 https://github.com/qemu/qemu.git /run/qemu" ]
+  - [ sh, -c, "cd /run/qemu && ./configure --without-default-features --target-list=arm-softmmu,riscv32-softmmu --enable-malloc-trim --enable-strip --prefix=/usr/local/" ]
+  - [ sh, -c, "cd /run/qemu/build && ninja" ]
+  - [ sh, -c, "cd /run/qemu/build && ninja install" ]
+  - [ sh, -c, "DEBIAN_FRONTEND=noninteractive apt -yq autoremove ninja-build python3-tomli libglib2.0-dev" ]

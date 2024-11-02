@@ -1,0 +1,7 @@
+packages:
+  - gcc-arm-linux-gnueabi
+  - g++-arm-linux-gnueabi
+
+runcmd:
+  - [ mkdir, /etc/qemu-binfmt ]
+  - [ ln, -s, /usr/arm-linux-gnueabi/, /etc/qemu-binfmt/arm ]

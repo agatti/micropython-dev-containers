@@ -1,0 +1,7 @@
+packages:
+  - gcc-riscv64-linux-gnu
+  - g++-riscv64-linux-gnu
+
+runcmd:
+  - [ mkdir, /etc/qemu-binfmt ]
+  - [ ln, -s, /usr/riscv64-linux-gnu/, /etc/qemu-binfmt/riscv64 ]

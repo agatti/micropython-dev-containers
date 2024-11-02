@@ -1,0 +1,18 @@
+packages:
+  - esptool
+
+write_files:
+  - path: /home/dev/.zprofile
+    content: |
+      if [ -f "/etc/profile" ]; then
+        source "/etc/profile"
+      fi
+      path=(
+        "/opt/xtensa-lx106-elf/bin"
+        $path
+      )
+
+runcmd:
+  - [ sh, -c, "wget https://github.com/jepler/esp-open-sdk/releases/download/2018-06-10/xtensa-lx106-elf-standalone.tar.gz -O /run/xtensa-lx106-elf-standalone.tar.gz" ]
+  - [ sh, -c, "tar xzf /run/xtensa-lx106-elf-standalone.tar.gz -C /opt" ]
+  - [ sh, -c, "rm -f /opt/xtensa-lx106-elf/bin/esptool.py" ]
